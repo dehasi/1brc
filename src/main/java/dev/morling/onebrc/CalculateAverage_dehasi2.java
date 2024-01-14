@@ -37,7 +37,7 @@ public class CalculateAverage_dehasi2 {
     }
 
     private static class MeasurementAggregator {
-        private String city;
+        private final String city;
         private double min;
         private double max;
         private double sum;
@@ -91,7 +91,7 @@ public class CalculateAverage_dehasi2 {
      * real 3m11.652s
      * user 2m49.760s
      * sys 0m10.443s
-     * 
+     *
      * ---- ????
      * real 3m5.269s
      * user 2m52.463s
@@ -102,20 +102,41 @@ public class CalculateAverage_dehasi2 {
      * real 2m48.554s
      * user 2m36.512s
      * sys 0m9.545s
-     * 
-     * 
+     *
+     *
      * All possible finals
-     * 
+     *
      * real 2m52.403s
      * user 2m39.459s
      * sys 0m9.784s
-     * 
-     * 
+     *
+     *
      * delete all finals
      * real 2m46.605s
      * user 2m34.479s
      * sys 0m9.545s
+     *
+     * Make ResultRow a normal class (continu deleteing finals)
+     * real 2m52.804s
+     * user 2m38.238s
+     * sys 0m9.528s
+     *
+     * make ResultRow just final
+     * real 2m55.696s
+     * user 2m39.700s
+     * sys 0m9.803s
      * 
+     * Revert ResultRow to record
+     * real 2m59.620s
+     * user 2m43.421s
+     * sys 0m10.226s
+     * 
+     * Use: private final String city;
+     * real    2m47.701s
+user    2m34.227s
+sys     0m9.430s
+
+     * Replace string concatenating with template
      */
     public static void main(String[] args) throws IOException {
 
@@ -136,6 +157,7 @@ public class CalculateAverage_dehasi2 {
             }
         });
 
+        // try system.gc()
         Map<String, ResultRow> measurements = new TreeMap<>();
         aggregatorMap.values().forEach(agg -> {
             measurements.put(agg.city, new ResultRow(agg.min, agg.sum / agg.count, agg.max));
