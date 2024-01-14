@@ -168,8 +168,29 @@ public class CalculateAverage_dehasi2 {
      * real 2m48.328s
      * user 2m35.097s
      * sys 0m9.504s
+     *
+     * inline updateWith method, indeed no differnce
+     * real 2m49.272s
+     * user 2m34.174s
+     * sys 0m9.884s
+     *
+     * real 2m50.059s
+     * user 2m36.023s
+     * sys 0m9.714s
+     *
+     * Use System.gc
+     *
+     * real 2m51.903s
+     * user 2m35.741s
+     * sys 0m9.718s
+     *
      * 
      * Use Graal
+     *
+     * real 2m38.376s
+     * user 2m23.359s
+     * sys 0m9.078s
+     * 
      */
     public static void main(String[] args) throws IOException {
 
@@ -187,7 +208,6 @@ public class CalculateAverage_dehasi2 {
             }
         });
 
-        // try system.gc()
         Map<String, ResultRow> measurements = new TreeMap<>();
         aggregatorMap.values().forEach(agg -> {
             measurements.put(agg.city, new ResultRow(agg.min, agg.sum / agg.count, agg.max));
