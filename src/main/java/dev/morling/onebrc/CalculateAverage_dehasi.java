@@ -21,6 +21,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import static java.lang.Double.MAX_VALUE;
 
@@ -78,6 +79,28 @@ public class CalculateAverage_dehasi {
      * user 5m26.247s
      * sys 0m12.309s
      *
+     * On direct priting, no treemap
+     * real 5m26.768s
+     * user 5m16.908s
+     * sys 0m12.379s
+     *
+     *
+     * event loner id hash = 256
+     *
+     * real 6m58.572s
+     * user 6m45.140s
+     * sys 0m13.356s
+     *
+     * HashMap with default size, deleted sp
+     * real 5m28.171s
+     * user 5m14.669s
+     * sys 0m12.979s
+     *
+     * Fill TreeMap then print, no keys sorting
+     * real    5m30.433s
+       user    5m15.379s
+       sys     0m12.684s
+
      */
     private static final Trie trie = new Trie();
 
@@ -90,26 +113,30 @@ public class CalculateAverage_dehasi {
             trie.add(city, temperature);
         });
 
-        start = true;
-        trie.printAll();
-        System.out.println("}");
-        // Map<String, ResultRow> measurements = new TreeMap<>();
-        // trie.fill(measurements);
-        // System.out.println(measurements);
+        // start = true;
+        // trie.printAll();
+        // System.out.println("}");
+        Map<String, ResultRow> measurements = new TreeMap<>();
+        trie.fill(measurements);
+        System.out.println(measurements);
     }
 
     private static boolean start = true;
 
     static class Trie {
+        public static final String START = "{";
+        public static final String MID_SEP = ", ";
+
         private final Map<Character, Trie> trie = new HashMap<>();
+
         private int count = 0;
         private double min = MAX_VALUE, max = -MAX_VALUE, sum = 0;
         private String city;
 
         void add(String city, double temperature) {
-            var cityChars = city.toCharArray();
             var cur = this;
-            for (final char ch : cityChars) {
+            for (int i = 0; i < city.length(); ++i) {
+                char ch = city.charAt(i);
                 cur.trie.putIfAbsent(ch, new Trie());
                 cur = cur.trie.get(ch);
             }
@@ -124,10 +151,11 @@ public class CalculateAverage_dehasi {
             if (city != null) {
                 measurements.put(city, new ResultRow(min, sum / count, max));
             }
-            ArrayList<Character> keys = new ArrayList<>(trie.keySet());
-            keys.sort(Character::compareTo);
-            for (final var key : keys) {
-                trie.get(key).fill(measurements);
+            // ArrayList<Character> keys = new ArrayList<>(trie.keySet());
+            // keys.sort(Character::compareTo);
+            for (final var child : trie.values()) {
+                child.fill(measurements);
+                // trie.get(key).fill(measurements);
             }
         }
 
@@ -138,10 +166,9 @@ public class CalculateAverage_dehasi {
         // ", "
         void printAll() {
             if (city != null) {
-                String prefix = start ? "{" : ", ";
+                String prefix = start ? START : MID_SEP;
                 System.out.print(prefix + city + "=" + round(min) + "/" + round(sum / count) + "/" + round(max));
-                if (start)
-                    start = false;
+                start = false;
             }
             ArrayList<Character> keys = new ArrayList<>(trie.keySet());
             keys.sort(Character::compareTo);
