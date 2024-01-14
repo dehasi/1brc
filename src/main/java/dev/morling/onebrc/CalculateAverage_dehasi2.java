@@ -78,12 +78,16 @@ public class CalculateAverage_dehasi2 {
      * sys 0m10.491s
      *
      * Add constructor
-     * real    3m11.652s
-     * user    2m59.161s
-     * sys     0m10.387s
+     * real 3m11.652s
+     * user 2m59.161s
+     * sys 0m10.387s
      *
+     * Use var inMap = agggregationMap.get(city);
      *
-
+     * real    3m4.090s
+     * user    2m51.752s
+     * sys     0m9.748s
+     *
      * 
      */
     public static void main(String[] args) throws IOException {
@@ -93,17 +97,17 @@ public class CalculateAverage_dehasi2 {
             int split = line.indexOf(';');
             String city = line.substring(0, split);
             double temperature = Double.parseDouble(line.substring(split + 1));
-            agggregationMap.compute(city, (__, oldValue) -> {
-                MeasurementAggregator aggregator = new MeasurementAggregator(city, temperature);
-                if (oldValue == null) {
-                    return aggregator;
-                }
-                aggregator.max = Math.max(oldValue.max, aggregator.max);
-                aggregator.min = Math.min(oldValue.min, aggregator.min);
-                aggregator.count += oldValue.count;
-                aggregator.sum += oldValue.sum;
-                return aggregator;
-            });
+            var aggregator = new MeasurementAggregator(city, temperature);
+            if (!agggregationMap.containsKey(city)) {
+                agggregationMap.put(city, aggregator);
+            }
+            else {
+                var inMap = agggregationMap.get(city);
+                inMap.max = Math.max(inMap.max, aggregator.max);
+                inMap.min = Math.min(inMap.min, aggregator.min);
+                inMap.count += inMap.count;
+                inMap.sum += inMap.sum;
+            }
         });
 
         Map<String, ResultRow> measurements = new TreeMap<>();
