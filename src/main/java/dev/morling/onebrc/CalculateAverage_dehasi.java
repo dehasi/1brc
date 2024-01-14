@@ -97,10 +97,10 @@ public class CalculateAverage_dehasi {
      * sys 0m12.979s
      *
      * Fill TreeMap then print, no keys sorting
-     * real    5m30.433s
-       user    5m15.379s
-       sys     0m12.684s
-
+     * real 5m30.433s
+     * user 5m15.379s
+     * sys 0m12.684s
+     * 
      */
     private static final Trie trie = new Trie();
 
