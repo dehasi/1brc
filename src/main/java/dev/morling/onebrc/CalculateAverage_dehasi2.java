@@ -26,13 +26,7 @@ public class CalculateAverage_dehasi2 {
 
     private static final String FILE = "./measurements.txt";
 
-    private static record Measurement(String station, double value) {
-        private Measurement(String[] parts) {
-            this(parts[0], Double.parseDouble(parts[1]));
-        }
-    }
-
-    private static record ResultRow(double min, double mean, double max) {
+   private  record ResultRow(double min, double mean, double max) {
         public String toString() {
             return round(min) + "/" + round(mean) + "/" + round(max);
         }
@@ -88,29 +82,48 @@ public class CalculateAverage_dehasi2 {
      * user 2m51.752s
      * sys 0m9.748s
      *
+     * after bugfix
+     * real 3m4.475s
+     * user 2m50.257s
+     * sys 0m9.914s
      *
+     * Inline :agggregationMap.put(city, new MeasurementAggregator(city, temperature));
+     * real 3m11.652s
+     * user 2m49.760s
+     * sys 0m10.443s
+     * 
+     * ---- ????
+     * real 3m5.269s
+     * user 2m52.463s
+     * sys 0m10.176s
+     *
+     * Inline agggregationMap.put(city, new MeasurementAggregator(city, temperature));
+     * use (inMap == null)
+     * real 2m48.554s
+     * user 2m36.512s
+     * sys 0m9.545s
+     * 
      */
     public static void main(String[] args) throws IOException {
 
-        Map<String, MeasurementAggregator> agggregationMap = new HashMap<>();
+        final Map<String, MeasurementAggregator> agggregationMap = new HashMap<>();
         Files.lines(Path.of(FILE)).forEach(line -> {
-            int split = line.indexOf(';');
-            String city = line.substring(0, split);
-            double temperature = Double.parseDouble(line.substring(split + 1));
-            var aggregator = new MeasurementAggregator(city, temperature);
-            if (!agggregationMap.containsKey(city)) {
-                agggregationMap.put(city, aggregator);
+            final int split = line.indexOf(';');
+            final String city = line.substring(0, split);
+            final double temperature = Double.parseDouble(line.substring(split + 1));
+            var inMap = agggregationMap.get(city);
+            if (inMap == null) {
+                agggregationMap.put(city, new MeasurementAggregator(city, temperature));
             }
             else {
-                var inMap = agggregationMap.get(city);
-                inMap.max = Math.max(inMap.max, aggregator.max);
-                inMap.min = Math.min(inMap.min, aggregator.min);
-                inMap.count += aggregator.count;
-                inMap.sum += aggregator.sum;
+                inMap.max = Math.max(inMap.max, temperature);
+                inMap.min = Math.min(inMap.min, temperature);
+                inMap.sum += temperature;
+                inMap.count += 1;
             }
         });
 
-        Map<String, ResultRow> measurements = new TreeMap<>();
+        final Map<String, ResultRow> measurements = new TreeMap<>();
         agggregationMap.values().forEach(agg -> {
             measurements.put(agg.city, new ResultRow(agg.min, agg.sum / agg.count, agg.max));
         });
