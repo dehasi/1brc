@@ -70,7 +70,7 @@ public class CalculateAverage_dehasi2 {
      * real 3m28.715s
      * user 3m13.798s
      * sys 0m10.607s
-     * 
+     *
      * Use hashmap
      *
      * real 3m18.573s
@@ -84,11 +84,11 @@ public class CalculateAverage_dehasi2 {
      *
      * Use var inMap = agggregationMap.get(city);
      *
-     * real    3m4.090s
-     * user    2m51.752s
-     * sys     0m9.748s
+     * real 3m4.090s
+     * user 2m51.752s
+     * sys 0m9.748s
      *
-     * 
+     *
      */
     public static void main(String[] args) throws IOException {
 
@@ -105,8 +105,8 @@ public class CalculateAverage_dehasi2 {
                 var inMap = agggregationMap.get(city);
                 inMap.max = Math.max(inMap.max, aggregator.max);
                 inMap.min = Math.min(inMap.min, aggregator.min);
-                inMap.count += inMap.count;
-                inMap.sum += inMap.sum;
+                inMap.count += aggregator.count;
+                inMap.sum += aggregator.sum;
             }
         });
 
