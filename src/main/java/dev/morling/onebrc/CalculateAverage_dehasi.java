@@ -18,11 +18,11 @@ package dev.morling.onebrc;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static java.lang.Double.MAX_VALUE;
-import static java.lang.Double.MIN_VALUE;
 
 public class CalculateAverage_dehasi {
 
@@ -67,26 +67,40 @@ public class CalculateAverage_dehasi {
      * user 5m38.495s
      * sys 0m12.781s
      *
+     *
+     * with Trie on Tree Map
+     * real 7m24.268s
+     * user 7m2.932s
+     * sys 0m16.625s
+     *
+     * with Trie on HashMap
+     * real    5m36.547s
+       user    5m26.247s
+       sys     0m12.309s
+
      */
     private static final Trie trie = new Trie();
 
     public static void main(String[] args) throws IOException {
 
         Files.lines(Path.of(FILE)).forEach(line -> {
-            var sd = line.split(";");
-            String city = sd[0];
-            double temperature = Double.parseDouble(sd[1]);
+            int split = line.indexOf(';');
+            String city = line.substring(0, split);
+            double temperature = Double.parseDouble(line.substring(split + 1));
             trie.add(city, temperature);
         });
 
-        Map<String, ResultRow> measurements = new TreeMap<>();
-        trie.fill(measurements);
-        System.out.println(measurements);
+        start = true;
+        trie.printAll();
+//        Map<String, ResultRow> measurements = new TreeMap<>();
+//        trie.fill(measurements);
+//        System.out.println(measurements);
     }
 
+    private static boolean start = true;
+
     static class Trie {
-        private final Map<Character, Trie> trie = new TreeMap<>();
-        private boolean isLeaf = false;
+        private final Map<Character, Trie> trie = new HashMap<>();
         private int count = 0;
         private double min = MAX_VALUE, max = -MAX_VALUE, sum = 0;
         private String city;
@@ -98,7 +112,6 @@ public class CalculateAverage_dehasi {
                 cur.trie.putIfAbsent(ch, new Trie());
                 cur = cur.trie.get(ch);
             }
-            cur.isLeaf = true;
             cur.city = city;
             cur.max = Math.max(cur.max, temperature);
             cur.min = Math.min(cur.min, temperature);
@@ -107,16 +120,30 @@ public class CalculateAverage_dehasi {
         }
 
         void fill(Map<String, ResultRow> measurements) {
-            if (isLeaf) {
+            if (city != null) {
                 measurements.put(city, new ResultRow(min, sum / count, max));
             }
-
-            for (final var chileTrie : trie.values()) {
-                chileTrie.fill(measurements);
+            ArrayList<Character> keys = new ArrayList<>(trie.keySet());
+            keys.sort(Character::compareTo);
+            for (final var key : keys) {
+                trie.get(key).fill(measurements);
             }
         }
 
+        private double round(double value) {
+            return Math.round(value * 10.0) / 10.0;
+        }
+
+        // ", "
         void printAll() {
+            if (city != null) {
+                String prefix = start ? "{" : ", ";
+                System.out.print(prefix + city + "=" + round(min) + "/" + round(sum / count) + "/" + round(max));
+                if (start) start = false;
+            }
+            for (final var chileTrie : trie.values()) {
+                chileTrie.printAll();
+            }
         }
     }
 }
