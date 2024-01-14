@@ -43,9 +43,16 @@ public class CalculateAverage_dehasi2 {
         private double sum;
         private long count = 1;
 
-        public MeasurementAggregator(String city, double temperature) {
+        MeasurementAggregator(String city, double temperature) {
             this.city = city;
             min = max = sum = temperature;
+        }
+
+        void updateWith(double temperature) {
+            max = Math.max(max, temperature);
+            min = Math.min(min, temperature);
+            sum += temperature;
+            ++count;
         }
     }
 
@@ -132,15 +139,41 @@ public class CalculateAverage_dehasi2 {
      * sys 0m10.226s
      * 
      * Use: private final String city;
-     * real    2m47.701s
-user    2m34.227s
-sys     0m9.430s
-
+     * real 2m47.701s
+     * user 2m34.227s
+     * sys 0m9.430s
+     * 
      * Replace string concatenating with template
+     * real 2m54.723s
+     * user 2m38.123s
+     * sys 0m9.716s
+     * 
+     * Add method updateWith(temperature) to MeasurementAggregator, no big difference
+     * real 2m54.069s
+     * user 2m39.321s
+     * sys 0m9.670s
+     * 
+     * Add big HashMap capacity, no difference
+     * real 2m58.629s
+     * user 2m39.208s
+     * sys 0m10.783s
+     *
+     * Add big HashMap capacity 5k
+     *
+     * real 2m52.683s
+     * user 2m36.693s
+     * sys 0m10.230s
+     *
+     * Add big HashMap capacity 4096, just use pow of two
+     * real 2m48.328s
+     * user 2m35.097s
+     * sys 0m9.504s
+     * 
+     * Use Graal
      */
     public static void main(String[] args) throws IOException {
 
-        Map<String, MeasurementAggregator> aggregatorMap = new HashMap<>();
+        Map<String, MeasurementAggregator> aggregatorMap = new HashMap<>(4096);
         Files.lines(Path.of(FILE)).forEach(line -> {
             int split = line.indexOf(';');
             String city = line.substring(0, split);
@@ -150,10 +183,7 @@ sys     0m9.430s
                 aggregatorMap.put(city, new MeasurementAggregator(city, temperature));
             }
             else {
-                inMap.max = Math.max(inMap.max, temperature);
-                inMap.min = Math.min(inMap.min, temperature);
-                inMap.sum += temperature;
-                inMap.count += 1;
+                inMap.updateWith(temperature);
             }
         });
 
