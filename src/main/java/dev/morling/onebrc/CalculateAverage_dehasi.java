@@ -21,6 +21,9 @@ import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static java.lang.Double.MAX_VALUE;
+import static java.lang.Double.MIN_VALUE;
+
 public class CalculateAverage_dehasi {
 
     private static final String FILE = "./measurements.txt";
@@ -69,7 +72,7 @@ public class CalculateAverage_dehasi {
 
     public static void main(String[] args) throws IOException {
 
-        Files.lines(Path.of(args[0])).forEach(line -> {
+        Files.lines(Path.of(FILE)).forEach(line -> {
             var sd = line.split(";");
             String city = sd[0];
             double temperature = Double.parseDouble(sd[1]);
@@ -85,7 +88,7 @@ public class CalculateAverage_dehasi {
         private final Map<Character, Trie> trie = new TreeMap<>();
         private boolean isLeaf = false;
         private int count = 0;
-        private double min = Double.MAX_VALUE, max = Double.MIN_VALUE, sum = 0;
+        private double min = MAX_VALUE, max = -MAX_VALUE, sum = 0;
         private String city;
 
         void add(String city, double temperature) {
@@ -112,7 +115,6 @@ public class CalculateAverage_dehasi {
                 chileTrie.fill(measurements);
             }
         }
-
 
         void printAll() {
         }
