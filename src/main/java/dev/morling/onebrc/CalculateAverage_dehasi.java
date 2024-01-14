@@ -18,14 +18,10 @@ package dev.morling.onebrc;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.stream.Collector;
 
-import static java.lang.Integer.MAX_VALUE;
 import static java.util.stream.Collectors.groupingBy;
 
 public class CalculateAverage_dehasi {
@@ -56,20 +52,26 @@ public class CalculateAverage_dehasi {
     }
 
     /*
-       Baseline:
-       real 4m11.364s
-       user 3m51.048s
-       sys 0m11.471s
-
-       My Code
-       real    5m41.593s
-       user    5m20.700s
-       sys     0m10.316s
+     * Baseline:
+     * real 4m11.364s
+     * user 3m51.048s
+     * sys 0m11.471s
+     * 
+     * My Code
+     * real 5m41.593s
+     * user 5m20.700s
+     * sys 0m10.316s
+     *
+     * If make the buffer standard. Therefore, laading text  is not a problem
+     * real    5m56.632s
+       user    5m38.495s
+       sys     0m12.781s
 
      */
+    private static final Trie trie = new Trie();
     public static void main(String[] args) throws IOException {
 
-        BufferedReader reader = new BufferedReader(new FileReader(FILE), MAX_VALUE / 10);
+        BufferedReader reader = new BufferedReader(new FileReader(FILE));
 
         Map<String, Double> max = new HashMap<>(), min = new HashMap<>(), sum = new HashMap<>();
         Map<String, Integer> cnt = new HashMap<>();
@@ -91,40 +93,33 @@ public class CalculateAverage_dehasi {
                 new ResultRow(min.get(city), sum.get(city) / cnt.get(city), max.get(city))));
 
         System.out.println(measurements);
-        // Map<String, Double> measurements1 = Files.lines(Paths.get(FILE))
-        // .map(l -> l.split(";"))
-        // .collect(groupingBy(m -> m[0], averagingDouble(m -> Double.parseDouble(m[1]))));
-        //
-        // measurements1 = new TreeMap<>(measurements1.entrySet()
-        // .stream()
-        // .collect(toMap(e -> e.getKey(), e -> Math.round(e.getValue() * 10.0) / 10.0)));
-        // System.out.println(measurements1);
+    }
 
-        // Collector<Measurement, MeasurementAggregator, ResultRow> collector = Collector.of(
-        // MeasurementAggregator::new,
-        // (a, m) -> {
-        // a.min = Math.min(a.min, m.value);
-        // a.max = Math.max(a.max, m.value);
-        // a.sum += m.value;
-        // a.count++;
-        // },
-        // (agg1, agg2) -> {
-        // var res = new MeasurementAggregator();
-        // res.min = Math.min(agg1.min, agg2.min);
-        // res.max = Math.max(agg1.max, agg2.max);
-        // res.sum = agg1.sum + agg2.sum;
-        // res.count = agg1.count + agg2.count;
-        //
-        // return res;
-        // },
-        // agg -> {
-        // return new ResultRow(agg.min, agg.sum / agg.count, agg.max);
-        // });
-        //
-        // Map<String, ResultRow> measurements = new TreeMap<>(Files.lines(Paths.get(FILE))
-        // .map(l -> new Measurement(l.split(";")))
-        // .collect(groupingBy(m -> m.station(), collector)));
-        //
-        // System.out.println(measurements);
+    static class Trie {
+        private static final int ALPHABET_LENGTH = 1024;
+        Trie[] trie = new Trie[ALPHABET_LENGTH];
+        ResultRow resultRow = null;
+        boolean isLeaf = false;
+        int count = 0;
+        double min = Double.MAX_VALUE, max = Double.MIN_VALUE, sum = 0;
+        String city;
+
+        void add(String city, double measurement) {
+            var cityChars = city.toCharArray();
+            var cur = this;
+            for (final char ch : cityChars) {
+                if (cur.trie[ch] == null)
+                    cur.trie[ch] = new Trie();
+                cur = cur.trie[ch];
+            }
+            cur.isLeaf = true;
+            cur.city = city;
+            cur.max = Math.max(cur.max, measurement);
+            cur.min = Math.min(cur.min, measurement);
+            cur.sum += measurement;
+            cur.count += 1;
+        }
+
+        void printAll(){}
     }
 }
