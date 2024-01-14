@@ -74,10 +74,10 @@ public class CalculateAverage_dehasi {
      * sys 0m16.625s
      *
      * with Trie on HashMap
-     * real    5m36.547s
-       user    5m26.247s
-       sys     0m12.309s
-
+     * real 5m36.547s
+     * user 5m26.247s
+     * sys 0m12.309s
+     *
      */
     private static final Trie trie = new Trie();
 
@@ -92,9 +92,10 @@ public class CalculateAverage_dehasi {
 
         start = true;
         trie.printAll();
-//        Map<String, ResultRow> measurements = new TreeMap<>();
-//        trie.fill(measurements);
-//        System.out.println(measurements);
+        System.out.println("}");
+        // Map<String, ResultRow> measurements = new TreeMap<>();
+        // trie.fill(measurements);
+        // System.out.println(measurements);
     }
 
     private static boolean start = true;
@@ -139,10 +140,13 @@ public class CalculateAverage_dehasi {
             if (city != null) {
                 String prefix = start ? "{" : ", ";
                 System.out.print(prefix + city + "=" + round(min) + "/" + round(sum / count) + "/" + round(max));
-                if (start) start = false;
+                if (start)
+                    start = false;
             }
-            for (final var chileTrie : trie.values()) {
-                chileTrie.printAll();
+            ArrayList<Character> keys = new ArrayList<>(trie.keySet());
+            keys.sort(Character::compareTo);
+            for (final var key : keys) {
+                trie.get(key).printAll();
             }
         }
     }
