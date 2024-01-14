@@ -24,7 +24,7 @@ import java.util.TreeMap;
 
 public class CalculateAverage_dehasi2 {
 
-    private static final String FILE = "./measurements.txt";
+    private static String FILE = "./measurements.txt";
 
    private  record ResultRow(double min, double mean, double max) {
         public String toString() {
@@ -37,7 +37,7 @@ public class CalculateAverage_dehasi2 {
     }
 
     private static class MeasurementAggregator {
-        private final String city;
+        private String city;
         private double min;
         private double max;
         private double sum;
@@ -103,17 +103,30 @@ public class CalculateAverage_dehasi2 {
      * user 2m36.512s
      * sys 0m9.545s
      * 
+     * 
+     * All possible finals
+     * 
+     * real 2m52.403s
+     * user 2m39.459s
+     * sys 0m9.784s
+     * 
+     * 
+     * delete all finals
+     * real 2m46.605s
+     * user 2m34.479s
+     * sys 0m9.545s
+     * 
      */
     public static void main(String[] args) throws IOException {
 
-        final Map<String, MeasurementAggregator> agggregationMap = new HashMap<>();
+        Map<String, MeasurementAggregator> aggregatorMap = new HashMap<>();
         Files.lines(Path.of(FILE)).forEach(line -> {
-            final int split = line.indexOf(';');
-            final String city = line.substring(0, split);
-            final double temperature = Double.parseDouble(line.substring(split + 1));
-            var inMap = agggregationMap.get(city);
+            int split = line.indexOf(';');
+            String city = line.substring(0, split);
+            double temperature = Double.parseDouble(line.substring(split + 1));
+            var inMap = aggregatorMap.get(city);
             if (inMap == null) {
-                agggregationMap.put(city, new MeasurementAggregator(city, temperature));
+                aggregatorMap.put(city, new MeasurementAggregator(city, temperature));
             }
             else {
                 inMap.max = Math.max(inMap.max, temperature);
@@ -123,8 +136,8 @@ public class CalculateAverage_dehasi2 {
             }
         });
 
-        final Map<String, ResultRow> measurements = new TreeMap<>();
-        agggregationMap.values().forEach(agg -> {
+        Map<String, ResultRow> measurements = new TreeMap<>();
+        aggregatorMap.values().forEach(agg -> {
             measurements.put(agg.city, new ResultRow(agg.min, agg.sum / agg.count, agg.max));
         });
 
