@@ -18,9 +18,9 @@ package dev.morling.onebrc;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class CalculateAverage_dehasi2 {
 
@@ -43,11 +43,16 @@ public class CalculateAverage_dehasi2 {
     }
 
     private static class MeasurementAggregator {
-        private String city;
-        private double min = Double.POSITIVE_INFINITY;
-        private double max = Double.NEGATIVE_INFINITY;
+        private final String city;
+        private double min;
+        private double max;
         private double sum;
-        private long count;
+        private long count = 1;
+
+        public MeasurementAggregator(String city, double temperature) {
+            this.city = city;
+            min = max = sum = temperature;
+        }
     }
 
     /*
@@ -62,23 +67,34 @@ public class CalculateAverage_dehasi2 {
      *
      * Try delete string.intern
      *
-     * real    3m28.715s
-     *  user    3m13.798s
-     *  sys     0m10.607s
+     * real 3m28.715s
+     * user 3m13.798s
+     * sys 0m10.607s
+     * 
+     * Use hashmap
+     *
+     * real 3m18.573s
+     * user 3m2.236s
+     * sys 0m10.491s
+     *
+     * Add constructor
+     * real    3m11.652s
+     * user    2m59.161s
+     * sys     0m10.387s
+     *
+     *
 
+     * 
      */
     public static void main(String[] args) throws IOException {
 
-        Map<String, MeasurementAggregator> agggregationMap = new ConcurrentHashMap<>();
+        Map<String, MeasurementAggregator> agggregationMap = new HashMap<>();
         Files.lines(Path.of(FILE)).forEach(line -> {
             int split = line.indexOf(';');
             String city = line.substring(0, split);
             double temperature = Double.parseDouble(line.substring(split + 1));
-            agggregationMap.compute(city, (key, oldValue) -> {
-                MeasurementAggregator aggregator = new MeasurementAggregator();
-                aggregator.city = key;
-                aggregator.max = aggregator.min = aggregator.sum = temperature;
-                aggregator.count = 1;
+            agggregationMap.compute(city, (__, oldValue) -> {
+                MeasurementAggregator aggregator = new MeasurementAggregator(city, temperature);
                 if (oldValue == null) {
                     return aggregator;
                 }
