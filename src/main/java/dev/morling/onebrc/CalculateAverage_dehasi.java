@@ -53,23 +53,23 @@ public class CalculateAverage_dehasi {
      * real 4m11.364s
      * user 3m51.048s
      * sys 0m11.471s
-     * 
+     *
      * My Code
      * real 5m41.593s
      * user 5m20.700s
      * sys 0m10.316s
      *
-     * If make the buffer standard. Therefore, laading text  is not a problem
-     * real    5m56.632s
-       user    5m38.495s
-       sys     0m12.781s
-
+     * If make the buffer standard. Therefore, laading text is not a problem
+     * real 5m56.632s
+     * user 5m38.495s
+     * sys 0m12.781s
+     *
      */
     private static final Trie trie = new Trie();
 
     public static void main(String[] args) throws IOException {
 
-        Files.lines(Path.of(FILE)).forEach(line -> {
+        Files.lines(Path.of(args[0])).forEach(line -> {
             var sd = line.split(";");
             String city = sd[0];
             double temperature = Double.parseDouble(sd[1]);
@@ -82,9 +82,7 @@ public class CalculateAverage_dehasi {
     }
 
     static class Trie {
-        private static final int ALPHABET_LENGTH = 1024;
-        private final Trie[] trie = new Trie[ALPHABET_LENGTH];
-        //        private ResultRow resultRow = null;
+        private final Map<Character, Trie> trie = new TreeMap<>();
         private boolean isLeaf = false;
         private int count = 0;
         private double min = Double.MAX_VALUE, max = Double.MIN_VALUE, sum = 0;
@@ -94,9 +92,8 @@ public class CalculateAverage_dehasi {
             var cityChars = city.toCharArray();
             var cur = this;
             for (final char ch : cityChars) {
-                if (cur.trie[ch] == null)
-                    cur.trie[ch] = new Trie();
-                cur = cur.trie[ch];
+                cur.trie.putIfAbsent(ch, new Trie());
+                cur = cur.trie.get(ch);
             }
             cur.isLeaf = true;
             cur.city = city;
@@ -109,12 +106,13 @@ public class CalculateAverage_dehasi {
         void fill(Map<String, ResultRow> measurements) {
             if (isLeaf) {
                 measurements.put(city, new ResultRow(min, sum / count, max));
-            } else {
-                for (final var chileTrie : trie) {
-                    chileTrie.fill(measurements);
-                }
+            }
+
+            for (final var chileTrie : trie.values()) {
+                chileTrie.fill(measurements);
             }
         }
+
 
         void printAll() {
         }
